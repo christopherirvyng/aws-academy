@@ -159,7 +159,7 @@ SELECT * FROM comparepay;
 
 
 -- ------------------------------------------------------------
--- TASK 5: Comparing Performance using File Compression (.gz)
+-- TASK 5: File Compression Comparison (.gz)
 -- ------------------------------------------------------------
 
 -- 1. Create External Table for Compressed Gzip January Dataset
