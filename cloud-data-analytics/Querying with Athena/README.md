@@ -5,8 +5,9 @@ Praktikum ini bertujuan untuk menganalisis data transaksi taksi berukuran besar 
 
 ### Objectives:
 - Mengonfigurasi AWS Glue Database dan mentransformasi skema metadata menggunakan Athena *Bulk Add Columns*.
-- Menerapkan strategi optimasi query (*Bucketizing* & *Partitioning*) untuk memangkas *Data Scanned* dan biaya.
-- Membuat *SQL Views* biasa dan *Joined Views* di Athena untuk mempermudah perbandingan analisis pendapatan bagi tim Data Science.
+- Menerapkan strategi optimasi query (*Bucketizing*, *Partitioning*, dan *File Compression* Gzip) untuk memangkas *Data Scanned* dan biaya.
+- Membuat *SQL Views* biasa dan *Joined Views* di Athena untuk mempermudah perbandingan analisis pendapatan.
+- Menganalisis kebijakan akses IAM (`Policy-For-Data-Scientists`) sesuai prinsip *least privilege*.
 
 ---
 
@@ -14,7 +15,8 @@ Praktikum ini bertujuan untuk menganalisis data transaksi taksi berukuran besar 
 - **Amazon Athena**: Interactive query service berbasis standar SQL.
 - **AWS Glue Data Catalog**: Menyimpan metadata skema database & tabel.
 - **Amazon S3**: Tempat penyimpanan objek data mentah (CSV) dan hasil query.
-- **Apache Parquet**: Format penyimpanan terkompresi berbasis kolom (*columnar storage*).
+- **AWS IAM**: Pengaturan izin dan keamanan akses berbasis kebijakan.
+- **Apache Parquet & Gzip**: Format kompresi dan penyimpanan terkompresi berbasis kolom.
 
 ---
 
@@ -33,7 +35,15 @@ Praktikum ini bertujuan untuk menganalisis data transaksi taksi berukuran besar 
 
 ### Task 4: Creating Views for Data Analysis
 - **Filtering Views:** Membuat view `cctrips` (transaksi Credit Card) dan `cashtrips` (transaksi Cash).
-- **Comparative Analysis View (`comparepay`):** Menggabungkan data agregasi pembayaran *credit card* dan *cash* per vendor menggunakan CTE (`WITH`) dan `JOIN` untuk membandingkan total pendapatan.
+- **Comparative Analysis View (`comparepay`):** Menggabungkan data agregasi pembayaran *credit card* dan *cash* per vendor menggunakan CTE (`WITH`) dan `JOIN`.
+
+### Task 5: Optimizing Athena Queries with File Compression (.gz)
+- Menggunakan dataset bulan Januari terkompresi Gzip (`jan_gzip`).
+- **Hasil:** Athena otomatis mendekompresi file `.gz` secara *on-the-fly*. Penggunaan file terkompresi secara drastis mengurangi *Data Scanned* dari S3, sehingga menekan biaya eksekusi query.
+
+### Task 6: Reviewing IAM Policy (`Policy-For-Data-Scientists`)
+- Menganalisis izin akses untuk pengguna `mary` (IAM Data Scientist).
+- Memastikan hak akses terbatas pada pembacaan/penulisan S3, pengelolaan AWS Glue/Athena, tanpa izin membuat S3 bucket baru (*least privilege principle*).
 
 ---
 
@@ -45,5 +55,7 @@ Praktikum ini bertujuan untuk menganalisis data transaksi taksi berukuran besar 
 | **Bucketizing** | Menyiapkan terpisah data `jan` | Sangat cepat untuk analisis data kurun waktu tertentu |
 | **Partitioning + Parquet** | Partisi `paytype` & format Columnar Parquet | **Paling Hemat & Cepat** (mengurangi data scanned secara drastis) |
 | **Athena Views & Joined Views** | `cctrips`, `cashtrips`, & `comparepay` | Memudahkan reusability & menyederhanakan logika query kompleks |
+| **File Compression (Gzip)** | External table `jan_gzip` (.csv.gz) | Mengurangi ukuran file S3 & biaya *data scanned* Athena |
+| **IAM Access Control** | `Policy-For-Data-Scientists` | Keamanan infrastruktur sesuai asas *least privilege* |
 
-> 📄 *Script SQL lengkap dari Task 1 hingga Task 4 tersedia pada file [`queries.sql`](./queries.sql).*
+> 📄 *Script SQL lengkap dari Task 1 hingga Task 5 tersedia pada file [`queries.sql`](./queries.sql).*
