@@ -134,7 +134,7 @@ SELECT * FROM cctrips;
 -- 4. Query Cash Trips View
 SELECT * FROM cashtrips;
 
--- 5. Step 18: Create Joined View to Compare Credit Card vs Cash Payments (comparepay)
+-- 5. Create Joined View to Compare Credit Card vs Cash Payments (comparepay)
 CREATE VIEW comparepay AS
 WITH
   cc AS
@@ -154,5 +154,45 @@ FROM cc
 JOIN cs
   ON cc.vendor = cs.vendor;
 
--- 6. Step 19: Query comparepay View
+-- 6. Query comparepay View
 SELECT * FROM comparepay;
+
+
+-- ------------------------------------------------------------
+-- TASK 5: Comparing Performance using File Compression (.gz)
+-- ------------------------------------------------------------
+
+-- 1. Create External Table for Compressed Gzip January Dataset
+CREATE EXTERNAL TABLE IF NOT EXISTS taxidata.jan_gzip (
+    vendor string,
+    pickup timestamp,
+    dropoff timestamp,
+    count int,
+    distance int,
+    ratecode string,
+    storeflag string,
+    pulocid string,
+    dolocid string,
+    paytype string,
+    fare decimal,
+    extra decimal,
+    mta_tax decimal,
+    tip decimal,
+    tolls decimal,
+    surcharge decimal,
+    total decimal
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+WITH SERDEPROPERTIES (
+    'serialization.format' = ',',
+    'field.delim' = ','
+)
+LOCATION 's3://aws-tc-largeobjects/CUR-TF-200-ACDSCI-1/Lab2/jan_gzip/'
+TBLPROPERTIES ('has_encrypted_data'='false');
+
+-- 2. Test Query against Compressed Gzip Dataset
+SELECT count(count) AS "Number of trips",
+       sum(total) AS "Total fares",
+       pickup AS "Trip date" 
+FROM jan_gzip 
+GROUP BY pickup;
