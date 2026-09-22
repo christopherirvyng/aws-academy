@@ -81,3 +81,24 @@ WHERE pickup >= TIMESTAMP '2017-01-01 00:00:00'
 
 -- 3. Test Query 2: Optimized Query against Bucketized Dataset
 SELECT * FROM taxidata.jan;
+
+-- ============================================================
+-- TASK 3: Optimizing Athena Queries by Using Partitions
+-- ============================================================
+
+-- 1. Create Partitioned Table in Parquet Format (Partitioned by paytype)
+CREATE TABLE taxidata.parquet_paytype
+WITH (
+    format = 'PARQUET',
+    external_location = 's3://aws-tc-largeobjects/CUR-TF-200-ACDSCI-1/Lab2/paytype/',
+    partitioned_by = ARRAY['paytype']
+) AS
+SELECT 
+    vendor, pickup, dropoff, count, distance, ratecode, 
+    storeflag, pulocid, dolocid, fare, extra, mta_tax, 
+    tip, tolls, surcharge, total, paytype
+FROM taxidata.yellow;
+
+-- 2. Test Query against Partitioned Table (Filtering Cash Payments: paytype = '2')
+SELECT * FROM taxidata.parquet_paytype 
+WHERE paytype = '2';
